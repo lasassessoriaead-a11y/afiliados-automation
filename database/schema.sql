@@ -35,7 +35,20 @@ create table if not exists affiliate_links (
   created_at timestamptz not null default now()
 );
 
+create table if not exists credentials (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  platform text not null,
+  account_label text,
+  affiliate_id text,
+  token_secret text not null,
+  status text not null default 'configured' check (status in ('configured','expired','revoked')),
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now()
+);
+
 create index if not exists products_user_id_idx on products(user_id);
 create index if not exists products_marketplace_idx on products(user_id, marketplace);
 create index if not exists products_created_at_idx on products(user_id, created_at desc);
 create index if not exists affiliate_links_user_id_idx on affiliate_links(user_id, created_at desc);
+create index if not exists credentials_user_id_idx on credentials(user_id, created_at desc);
