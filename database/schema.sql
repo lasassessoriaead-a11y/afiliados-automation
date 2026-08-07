@@ -26,6 +26,16 @@ create table if not exists products (
   updated_at timestamptz not null default now()
 );
 
+create table if not exists affiliate_links (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references users(id) on delete cascade,
+  marketplace text not null,
+  original_url text not null,
+  affiliate_url text not null,
+  created_at timestamptz not null default now()
+);
+
 create index if not exists products_user_id_idx on products(user_id);
 create index if not exists products_marketplace_idx on products(user_id, marketplace);
 create index if not exists products_created_at_idx on products(user_id, created_at desc);
+create index if not exists affiliate_links_user_id_idx on affiliate_links(user_id, created_at desc);
