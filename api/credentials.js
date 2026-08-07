@@ -1,5 +1,6 @@
 import { query } from './_db.js';
 import { requireAuth, sendError } from './_auth.js';
+import { encryptSecret } from './_crypto.js';
 
 export default async function handler(req, res) {
   try {
@@ -17,11 +18,12 @@ export default async function handler(req, res) {
     if (req.method === 'POST') {
       const { platform, accountLabel, affiliateId, token } = req.body || {};
       if (!platform || !token) return res.status(400).json({ error: 'Plataforma e token são obrigatórios' });
+      const encryptedToken = encryptSecret(token);
       const result = await query(
         `insert into credentials (user_id, platform, account_label, affiliate_id, token_secret)
          values ($1,$2,$3,$4,$5)
          returning id, platform, account_label, affiliate_id, status, created_at, updated_at`,
-        [auth.sub, String(platform).trim(), accountLabel ? String(accountLabel).trim() : null, affiliateId ? String(affiliateId).trim() : null, String(token)]
+        [auth.sub, String(platform).trim(), accountLabel ? String(accountLabel).trim() : null, affiliateId ? String(affiliateId).trim() : null, encryptedToken]
       );
       return res.status(201).json({ credential: result.rows[0] });
     }
