@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>LuDrop — Login</title>
+<style>
+:root{--bg:#0f1426;--card:#fff;--text:#172033;--muted:#718096;--primary:#635bff;--primary2:#5148e5;--line:#e7ebf2;--danger:#b42318;--ok:#087443}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;display:grid;place-items:center;background:linear-gradient(145deg,#0f1426,#181f3a);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;color:var(--text);padding:24px}.card{width:min(430px,100%);background:var(--card);border-radius:18px;padding:30px;box-shadow:0 20px 60px #0005}.brand{font-size:28px;font-weight:900;margin-bottom:4px}.brand span{color:var(--primary)}.subtitle{color:var(--muted);margin:0 0 24px}.field{margin:14px 0}.field label{display:block;font-size:13px;font-weight:700;margin-bottom:6px}.field input{width:100%;padding:12px 13px;border:1px solid var(--line);border-radius:10px;outline:none}.field input:focus{border-color:#aaa4ff;box-shadow:0 0 0 3px #635bff12}.btn{width:100%;border:0;border-radius:10px;padding:12px 15px;background:var(--primary);color:#fff;font-weight:800;cursor:pointer;margin-top:8px}.btn:hover{background:var(--primary2)}.btn:disabled{opacity:.65;cursor:wait}.msg{display:none;margin-top:14px;padding:11px 12px;border-radius:9px;font-size:13px}.msg.show{display:block}.msg.error{background:#fff0f0;color:var(--danger)}.msg.ok{background:#ecfdf3;color:var(--ok)}.first{margin-top:20px;padding-top:18px;border-top:1px solid var(--line);font-size:13px;color:var(--muted)}.first a{color:var(--primary);font-weight:700;cursor:pointer;text-decoration:none}.register{display:none;margin-top:14px}.register.show{display:block}
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="brand">Lu<span>Drop</span></div>
+  <p class="subtitle">Entre para acessar o painel de automação de afiliados.</p>
+
+  <form id="loginForm">
+    <div class="field"><label for="email">E-mail</label><input id="email" type="email" autocomplete="username" required></div>
+    <div class="field"><label for="password">Senha</label><input id="password" type="password" autocomplete="current-password" minlength="8" required></div>
+    <button id="loginBtn" class="btn" type="submit">Entrar</button>
+  </form>
+  <div id="msg" class="msg"></div>
+
+  <div class="first">Primeiro acesso? <a id="showRegister">Criar administrador inicial</a></div>
+  <form id="registerForm" class="register">
+    <div class="field"><label for="name">Nome</label><input id="name" required></div>
+    <div class="field"><label for="regEmail">E-mail</label><input id="regEmail" type="email" autocomplete="username" required></div>
+    <div class="field"><label for="regPassword">Senha</label><input id="regPassword" type="password" autocomplete="new-password" minlength="8" required></div>
+    <button id="registerBtn" class="btn" type="submit">Criar acesso administrador</button>
+  </form>
+</div>
+<script>
+const msg=document.getElementById('msg');
+function showMsg(text,type='error'){msg.textContent=text;msg.className='msg show '+type}
+function saveSession(data){localStorage.setItem('ludrop_token',data.token);localStorage.setItem('ludrop_user',JSON.stringify(data.user));location.href='/'}
+async function post(url,payload){const r=await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(payload)});const data=await r.json().catch(()=>({}));if(!r.ok)throw new Error(data.error||'Não foi possível concluir a solicitação');return data}
+document.getElementById('loginForm').addEventListener('submit',async e=>{e.preventDefault();const b=document.getElementById('loginBtn');b.disabled=true;showMsg('Entrando...','ok');try{saveSession(await post('/api/auth/login',{email:email.value,password:password.value}))}catch(err){showMsg(err.message)}finally{b.disabled=false}});
+document.getElementById('showRegister').addEventListener('click',()=>document.getElementById('registerForm').classList.toggle('show'));
+document.getElementById('registerForm').addEventListener('submit',async e=>{e.preventDefault();const b=document.getElementById('registerBtn');b.disabled=true;showMsg('Criando administrador...','ok');try{saveSession(await post('/api/auth/register',{name:name.value,email:regEmail.value,password:regPassword.value}))}catch(err){showMsg(err.message)}finally{b.disabled=false}});
+</script>
+</body>
+</html>
