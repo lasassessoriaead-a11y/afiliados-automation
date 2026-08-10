@@ -46,5 +46,6 @@ async function loadHotProducts(useQuery=false){const requestSeq=++hotRequestSeq,
 let initialized=false;function initApp(){if(initialized)return;initialized=true;refreshMercadoLivre();renderDivulgacao()}
 document.addEventListener('DOMContentLoaded',()=>{if(restoreLogin())initApp();else document.getElementById('loginUser').focus()});
 </script>
+<script src="/auto-trends.js"></script>
 </body>
 </html>
